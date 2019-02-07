@@ -50,18 +50,19 @@ window.onload = function init()
 function loop()
 {
 	var currentFrameTime = Date.now();
-	var dt = currentFrameTime - lastFrameTime; // Delta time (change in time since the last frame)
+	var dt = (currentFrameTime - lastFrameTime) / 20; // Delta time (change in time since the last frame) // Should be divided by 1000, but those are harder numbers to work with
 	lastFrameTime = currentFrameTime; // Reset the last frame time so we can calculate dt on next loop
 	
-	playerCollider.update(1);
-	if (playerCollider.checkCollision(floor))
+	playerCollider.update(dt);
+	
+	if (playerCollider.checkCollision(floor) == "BOTTOM")
 	{
 		playerCollider.velocity = new Vector2(playerCollider.velocity.x, 0);
 		playerCollider.position = new Vector2(playerCollider.position.x, floor.position.y - playerCollider.height);
 		isGrounded = true;
 	}
 	
-	context.translate(playerCollider.position.x - prevPlayerPos.x, playerCollider.position.y - prevPlayerPos.y);
+	context.translate(playerCollider.position.x - prevPlayerPos.x, 0);//playerCollider.position.y - prevPlayerPos.y);
 	
 	prevPlayerPos = playerCollider.position;
 	
@@ -99,7 +100,7 @@ function onKeyDown(event)
             //Move Left
 			if (playerCollider.velocity.x > -3)
 			{
-				playerCollider.velocity.add(new Vector2(-3, 0));
+				playerCollider.velocity = playerCollider.velocity.add(new Vector2(-3, 0));
 			}
             break;
 
@@ -107,7 +108,7 @@ function onKeyDown(event)
             //Move Right
 			if (playerCollider.velocity.x < 3)
 			{
-				playerCollider.velocity.add(new Vector2(3, 0));
+				playerCollider.velocity = playerCollider.velocity.add(new Vector2(3, 0));
 			}
             break;
 
