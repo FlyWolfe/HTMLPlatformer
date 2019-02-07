@@ -61,8 +61,9 @@ function loop()
 		playerCollider.position = new Vector2(playerCollider.position.x, floor.position.y - playerCollider.height);
 		isGrounded = true;
 	}
-	
-	context.translate(playerCollider.position.x - prevPlayerPos.x, 0);//playerCollider.position.y - prevPlayerPos.y);
+	context.setTransform();
+	context.translate(-playerCollider.position.x + 250, -playerCollider.position.y + 250);
+	//context.translate(playerCollider.position.x - prevPlayerPos.x, 0);//playerCollider.position.y - prevPlayerPos.y);
 	
 	prevPlayerPos = playerCollider.position;
 	
@@ -77,7 +78,7 @@ function loop()
  */
 function render()
 {
-	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.clearRect(playerCollider.position.x - 250, playerCollider.position.y - 250, canvas.width * 2, canvas.height * 2);
 	context.beginPath();
 	context.rect(floor.position.x, floor.position.y, floor.width, floor.height);
 	context.fillStyle = "red";
