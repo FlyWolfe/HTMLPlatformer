@@ -52,13 +52,15 @@ class Vector2
 
 // Defines a collision box in world space. the point positions define the top-left part of the object (Or bottom-left... We need to determine world space)
 class Collider {
-    constructor(position, width, height, gravity)
+    constructor(position, width, height, gravity, maxFallSpeed)
 	{
         this.position = position;
 		this.width = width;
 		this.height = height;
 		this.gravity = gravity;
 		this.velocity = new Vector2(0, 0);
+		this.maxFallSpeed = maxFallSpeed;
+		this.prevPos = position;
     }
 	
 	// Move the collider some distance in x and y without respect to velocity
@@ -81,40 +83,40 @@ class Collider {
 		var leftCollision = otherRight - this.position.x;
 		var rightCollision = thisRight = other.position.x;
 		
+		var collisionDir = new Vector2("NONE", "NONE");
+		
 		if (this.position.x - this.width < other.position.x + other.width && this.position.x + this.width > other.position.x &&
 			this.position.y - this.height < other.position.y + other.height && this.position.y + this.height > other.position.y)
 		{
-			if (topCollision < bottomCollision && topCollision < leftCollision && topCollision < rightCollision)
+			if (this.velocity.y < 0 && topCollision < bottomCollision)
 			{
-				return "TOP";
+				collisionDir.y = "TOP";
 			}
-			else if (bottomCollision < topCollision && bottomCollision < leftCollision && bottomCollision < rightCollision)
+			if (this.velocity.y > 0 && bottomCollision < topCollision)
 			{
-				return "BOTTOM";
+				collisionDir.y = "BOTTOM";
 			}
-			else if (leftCollision < topCollision && leftCollision < bottomCollision && leftCollision < rightCollision)
+			if (this.velocity.x < 0 && leftCollision < rightCollision)
 			{
-				return "LEFT";
+				collisionDir.x = "LEFT";
 			}
-			else if (rightCollision < topCollision && rightCollision < leftCollision && rightCollision < bottomCollision)
+			if (this.velocity.x > 0 && rightCollision < leftCollision)
 			{
-				return "RIGHT";
-			}
-			else
-			{
-				return "NONE";
+				collisionDir.x = "RIGHT";
 			}
 		}
-		else
-		{
-			return "NONE";
-		}
+		
+		return collisionDir;
 	}
 	
 	// Apply gravity to the object and make it move down in the y direction
 	applyGravity(time)
 	{
 		this.velocity.y += this.gravity * time;
+		if (this.velocity.y > this.maxFallSpeed)
+		{
+			this.velocity.y = this.maxFallSpeed;
+		}
 	}
 	
 	setGravity(gravity)
@@ -127,5 +129,6 @@ class Collider {
 		this.applyGravity(time);
 		var tempVel = this.velocity.multiply(time);
 		this.position = this.position.add(tempVel); // get our velocity multiplied by the time since last frame and add to our position
+		this.prevPos = this.position;
 	}
 }

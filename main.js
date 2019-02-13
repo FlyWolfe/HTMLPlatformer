@@ -1,9 +1,8 @@
 var lastFrameTime; // Time of the last frame
 
 var playerImg;
-
 var playerCollider;
-var floor;
+var player;
 
 var context;
 
@@ -21,22 +20,26 @@ window.onload = function init()
 {
 	canvas = document.getElementById('canvas');
 	context = canvas.getContext('2d');
+	
+	// Create the player image
 	playerImg = new Image();
-	playerCollider = new Collider(new Vector2(69, 50), 100, 100, 1);
-	floor = new Collider(new Vector2(50, 200), 500, 10, 0);
-
-	playerImg.onload = function() {
-		context.drawImage(playerImg, playerCollider.position.x, playerCollider.position.y, playerCollider.width, playerCollider.height);
-	};
 	playerImg.src = 'sprites/TurtleDown.png';
 	
+	// Initialize the tilemap
+	tilemap = new Tilemap("tilemap/tilemap.txt", canvas, context, "#6B8CFF", 32);
+	
+	// Create the player
+	player = new Player(playerImg, tilemap);
+	
+	// Get the current time and set up lastFrameTime for delta time calculation
 	lastFrameTime = Date.now();
 	
-	
+	// Set up Key Presses
 	document.onkeydown = onKeyDown;
     document.onkeyup = onKeyUp;
 	
-	prevPlayerPos = playerCollider.position;
+	// For calculating camera movement based on player movement delta
+	prevPlayerPos = player.collider.position;
 	
 	
 	// End of Load, move to game loop
@@ -53,19 +56,30 @@ function loop()
 	var dt = (currentFrameTime - lastFrameTime) / 20; // Delta time (change in time since the last frame) // Should be divided by 1000, but those are harder numbers to work with
 	lastFrameTime = currentFrameTime; // Reset the last frame time so we can calculate dt on next loop
 	
-	playerCollider.update(dt);
+	player.update(dt);
 	
-	if (playerCollider.checkCollision(floor) == "BOTTOM")
+	/*if (player.collider.checkCollision(floor) == "BOTTOM")
 	{
-		playerCollider.velocity = new Vector2(playerCollider.velocity.x, 0);
-		playerCollider.position = new Vector2(playerCollider.position.x, floor.position.y - playerCollider.height);
+		player.collider.velocity = new Vector2(player.collider.velocity.x, 0);
+		player.collider.position = new Vector2(player.collider.position.x, floor.position.y - player.collider.height);
 		isGrounded = true;
-	}
-	context.setTransform();
-	context.translate(-playerCollider.position.x + 250, -playerCollider.position.y + 250);
-	//context.translate(playerCollider.position.x - prevPlayerPos.x, 0);//playerCollider.position.y - prevPlayerPos.y);
+	}*/
 	
-	prevPlayerPos = playerCollider.position;
+	/*for (let i = 0; i < tilemap.map.length; i ++) {
+		for(let j = 0; j < tilemap.map[i].length; j ++) {
+			if (player.collider.checkCollision(tilemap.collider[i][j]) == "Bottom")
+			{
+				player.collider.velocity = new Vector2(player.collider.velocity.x, 0);
+				player.collider.position = new Vector2(player.collider.position.x, tilemap.collider[i][j].position.y - player.collider.height);
+				isGrounded = true;
+				console.log("Bottom");
+			}
+		}
+	}*/
+	context.setTransform();
+	context.translate(-player.collider.position.x + 250, -player.collider.position.y + 250);
+	
+	prevPlayerPos = player.collider.position;
 	
 	// End of Loop, render then repeat
 	render();
@@ -78,13 +92,9 @@ function loop()
  */
 function render()
 {
-	context.clearRect(playerCollider.position.x - 250, playerCollider.position.y - 250, canvas.width * 2, canvas.height * 2);
-	context.beginPath();
-	context.rect(floor.position.x, floor.position.y, floor.width, floor.height);
-	context.fillStyle = "red";
-	context.fill();
-	//context.drawImage(playerImg, 100, 100, 100, 100);
-	context.drawImage(playerImg, playerCollider.position.x, playerCollider.position.y, playerCollider.width, playerCollider.height);
+	context.clearRect(player.collider.position.x - 250, player.collider.position.y - 250, canvas.width * 2, canvas.height * 2);
+	tilemap.draw(player.collider.position.x - 250, player.collider.position.y - 250, canvas.width * 2, canvas.height * 2);
+	player.draw(canvas, context);
 }
 
 
@@ -99,17 +109,17 @@ function onKeyDown(event)
     switch (key) {
         case 'A':
             //Move Left
-			if (playerCollider.velocity.x > -3)
+			if (player.collider.velocity.x > -3)
 			{
-				playerCollider.velocity = playerCollider.velocity.add(new Vector2(-3, 0));
+				player.collider.velocity = player.collider.velocity.add(new Vector2(-3, 0));
 			}
             break;
 
         case 'D':
             //Move Right
-			if (playerCollider.velocity.x < 3)
+			if (player.collider.velocity.x < 3)
 			{
-				playerCollider.velocity = playerCollider.velocity.add(new Vector2(3, 0));
+				player.collider.velocity = player.collider.velocity.add(new Vector2(3, 0));
 			}
             break;
 
@@ -117,7 +127,7 @@ function onKeyDown(event)
 			//Jump
 			if (isGrounded)
 			{
-				playerCollider.velocity = new Vector2(playerCollider.velocity.x, -20);
+				player.collider.velocity = new Vector2(player.collider.velocity.x, -20);
 				isGrounded = false;
 			}
 			break;
@@ -138,7 +148,7 @@ function onKeyUp(event)
         // Both A and D control horizontal movement.
         case 'A':
         case 'D':
-			playerCollider.velocity = new Vector2(0, playerCollider.velocity.y);
+			player.collider.velocity = new Vector2(0, player.collider.velocity.y);
             break;
 		case 'W':
 			//Stop Jumping
