@@ -16,7 +16,7 @@ class Player
 	{
 		for (let i = 0; i < tilemap.map.length; i ++) {
 			for(let j = 0; j < tilemap.map[i].length; j ++) {
-				if (tilemap.iscollider[i][j] != '00')
+				if (tilemap.iscollider[i][j] == "01")
 				{
 					if (this.collider.checkCollision(tilemap.collider[i][j]).y == "BOTTOM")
 					{

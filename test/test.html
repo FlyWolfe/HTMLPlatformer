@@ -1,0 +1,57 @@
+<html>
+<head>
+<!-- <base href="file:///C:/path/to/your/folder/"/> -->
+<script>
+/*window.onload = function(){
+    var iframe = document.createElement('iframe');
+    iframe.id = 'iframe';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    iframe.src = 'map01.txt';
+    setTimeout(function(){
+        var text = document.getElementById('iframe').contentDocument.body.firstChild.innerHTML;
+        alert(text);
+    }, 1000);
+}*/
+
+function readMapFile(file){
+    
+    var iframe = document.createElement('iframe');
+    iframe.id = 'iframe';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    iframe.src = file;
+    
+
+    var filetext = document.getElementById('iframe').contentDocument.body.firstChild.innerHTML;
+    var map = new Array();
+    
+    var lineArray = filetext.split("\n"); 
+    var i;
+    for(i = 0; i < lineArray.length; i++){
+       var elementArray = lineArray[i].split(" ");
+        
+       var j;
+       for(j = 0; j < elementArray.length; j++){ 
+           var elem = elementArray[j];
+           if (elem) {
+                map.push("'" + elem + "'");
+           }
+       }       
+    }
+    
+    return map;
+}
+    
+function test(){
+    alert(readMapFile('map01.txt'));
+}
+    
+</script>
+</head>
+<body>
+<h1>Hello World!</h1>
+    
+<button onclick="test()"> read Map</button>
+</body>
+</html>
